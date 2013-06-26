@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html>
     <head>
-        <title>DB-MySQL - Jasny · web development</title>
+        <title>Jasny DB - Jasny · web development</title>
         
         <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
         <base href="http://jasny.github.com" />
@@ -34,51 +34,10 @@
                 <div id="main-content">
                     <div class="post">
                         <div class="entry">
-
-                            <section id="downloads" class="clearfix">
-                                <a href="https://github.com/jasny/DB-MySQL/zipball/master" id="download-zip" class="button" onclick="pageTracker._trackEvent('Downloads', 'Download', 'Download zip');"><span>Download .zip</span></a>
-                                <a href="https://github.com/jasny/DB-MySQL/tarball/master" id="download-tar-gz" class="button" onclick="pageTracker._trackEvent('Downloads', 'Download', 'Download%20tar.html');"><span>Download .tar.gz</span></a>
-                                <a href="https://github.com/jasny/DB-MySQL" id="view-on-github" class="button" onclick="pageTracker._trackEvent('Downloads', 'View on GitHub', 'View on GitHub');"><span>View on GitHub</span></a>
-                            </section>
-
-                            <hr>
-
-                            <section id="main_content">
-                                <a href="http://travis-ci.org/jasny/DB-MySQL" style="float: right"><img src="https://secure.travis-ci.org/jasny/DB-MySQL.png?branch=master" alt="Build Status"></a>
-                                <h2>Jasny's DB layer for MySQL</h2>
-
-                                <p>A simple DB layer in PHP for using MySQL, featuring</p>
-
-                                <ul>
-                                    <li>Global connection (singleton)</li>
-                                    <li>Parameter binding</li>
-                                    <li>Quoting tables/fields and values</li>
-                                    <li>Fetch all rows, a column, key/value pairs or single value</li>
-                                    <li>Simple saving by passing associated arrays</li>
-                                    <li>Query exceptions (instead of returning false)</li>
-                                </ul>
-                                
-                                <h2>Example</h2>
-
-                                <pre><code>&lt;?php
-    new DB($host, $user, $pwd, $dbname);
-    $result = DB::conn()-&gt;query("SELECT * FROM foo");
-    $result = DB::conn()-&gt;query("SELECT * FROM foo WHERE type = ?", $type);
-    $result = DB::conn()-&gt;query("SELECT * FROM foo WHERE type = ? AND cat IN ?", $type, array(1, 7));
-
-    $items = DB::conn()-&gt;fetchAll("SELECT id, name, description FROM foo WHERE type = ?", MYSQLI_FETCH_ASSOC, $type);
-    $item  = DB::conn()-&gt;fetchOne("SELECT * FROM foo WHERE id = ?", MYSQLI_FETCH_ASSOC, $id);
-    $names = DB::conn()-&gt;fetchColumn("SELECT name FROM foo WHERE type = ?", $type);
-    $list  = DB::conn()-&gt;fetchPairs("SELECT id, name FROM foo WHERE type = ?", $type);
-    $name  = DB::conn()-&gt;fetchValue("SELECT name FROM foo WHERE id = ?", $id);
-
-    DB::conn()-&gt;save('foo', $values);
-    DB::conn()-&gt;save('foo', array($values1, $values2, $values3));
-</code></pre>
-
+                            <section>
                                 <h2>API documentation (generated)</h2>
 
-                                <p><a href="docshtml.html">http://jasny.github.com/DB-MySQL/docs</a></p>
+                                <p><a href="/docs">/docs</a></p>
                             </section>
 
                             <div class="shr-publisher-876"></div><!-- Start Shareaholic LikeButtonSetBottom Automatic --><!-- End Shareaholic LikeButtonSetBottom Automatic -->
@@ -86,7 +45,7 @@
                     </div>
                 </div>
                 <div id="footer">
-                    <a href="DB-MySQL#" class="alignright">Back to top &UpArrow;</a>
+                    <a href="db#" class="alignright">Back to top &UpArrow;</a>
                     <p><a href="http://www.jasny.net/">Jasny · web development</a> proudly powered by <a href="http://www.github.com/">GitHub</a></p>
                 </div><!-- close:footer -->
             </div><!-- close:wrapper -->
@@ -99,7 +58,7 @@
         <script type="text/javascript" src="http://www.google-analytics.com/ga.js"></script>
         <script type="text/javascript">
             try {
-                var pageTracker = _gat._getTracker("UA-32388850-3");
+                var pageTracker = _gat._getTracker("UA-32388850-6");
                 pageTracker._trackPageview();
             } catch(err) {}
         </script>
