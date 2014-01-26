@@ -1,12 +1,12 @@
 <?php
 /**
  * Tests for Jasny\MySQL\DB.
- * 
+ *
  * The MySQL user needs to have full permissions for `dbtest`.*.
- * 
+ *
  * Please configure default mysqli settings in your php.ini.
  * Alternatively run as `php -d mysqli.default_user=USER -d mysqli.default_pw=PASSWORD /usr/bin/phpunit`
- * 
+ *
  * @author Arnold Daniels
  */
 /** */
@@ -17,7 +17,7 @@ require_once __DIR__ . '/TestCase.php';
 
 /**
  * Tests for MySQL\Connection.
- * 
+ *
  * @package Test
  * @subpackage MySQL
  */
@@ -37,22 +37,50 @@ class ConnectionTest extends TestCase
 
         $this->assertSame($conn, Connection::conn());
     }
-    
+
+    public function testConn_Exception()
+    {
+        try{
+            Connection::conn("testFail");
+            $this->fail("No MySQL\Exception was thrown");
+        }
+        catch(\Exception $e){
+            $this->assertEquals("MySQL connection 'testFail' doesn't exist.", $e->getMessage());
+        }
+    }
+
+    /**
+     * Test Connection::useAs() and Connection::conn()
+     */
+
+    public function testConn_useAs()
+    {
+        $this->db->useAs('test');
+        $conn = Connection::conn("test");
+        $this->assertInstanceOf('Jasny\DB\MySQL\Connection', $conn);
+        $this->assertSame($this->db, $conn);
+
+        list($dbname) = mysqli_query($conn, "SELECT DATABASE()")->fetch_row();
+        $this->assertEquals('dbtest', $dbname);
+
+        $this->assertSame($conn, Connection::conn());
+    }
+
     /**
      * Test Connection::__construct() and Connection::close()
      */
     public function testConstruct()
     {
         $this->disconnectDB();
-        
+
         $settings = (object)array('host'=>ini_get('mysqli.default_host'), 'username'=>ini_get('mysqli.default_user') ?: 'root', 'password'=>ini_get('mysqli.default_pw'), 'dbname'=>'dbtest');
         $this->db = new Connection($settings);
-        
+
         list($dbname) = mysqli_query($this->db, "SELECT DATABASE()")->fetch_row();
         $this->assertEquals('dbtest', $dbname);
-        
+
         $this->assertSame($this->db, Connection::conn());
-    }    
+    }
 
     /**
      * Test Connection::useAs()
@@ -62,7 +90,7 @@ class ConnectionTest extends TestCase
         $this->db->useAs('test');
         $this->assertSame($this->db, Connection::conn('test'));
     }
-    
+
     /**
      * Test Connection::useAs('default')
      */
@@ -76,7 +104,7 @@ class ConnectionTest extends TestCase
         $this->assertSame($this->db, Connection::conn());
         $this->assertSame($this->db, \Jasny\DB\Table::$defaultConnection);
     }
-    
+
     /**
      * Test Connection::getConnectionName()
      */
@@ -84,8 +112,7 @@ class ConnectionTest extends TestCase
     {
         $this->assertSame('default', $this->db->getConnectionName());
     }
-    
-            
+
     /**
      * Test Connection::quote()
      */
@@ -108,10 +135,10 @@ class ConnectionTest extends TestCase
 
         $this->assertSame('(10, 20, 99)', Connection::quote(array(10, 20, 99)));
         $this->assertSame('(10, NULL, "jan", TRUE)', Connection::quote(array(10, null, 'jan', true)));
-        
+
         $this->assertSame('"1981-08-22 00:00:00"', Connection::quote(new \DateTime('22-08-1981')));
         $this->assertSame('"2013-03-01 16:04:10"', Connection::quote(new \DateTime('01-03-2013 16:04:10')));
-        
+
         if (date_default_timezone_get()) {
             $datetime = new \DateTime('2013-03-01 16:04:10+00:00');
             $datetime->setTimezone(new \DateTimeZone(date_default_timezone_get()));
@@ -119,7 +146,7 @@ class ConnectionTest extends TestCase
         }
     }
 
-    /** 
+    /**
      * Test Connection::backquote
      * More tests are done in jasny/dbquery
      */
@@ -131,7 +158,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::bind() with basic placeholders
-     * 
+     *
      * @depends testQuote
      */
     public function testBind()
@@ -166,7 +193,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::bind() with named placeholders
-     * 
+     *
      * @depends testQuote
      */
     public function testBind_Named()
@@ -195,7 +222,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::query() with basic placeholders
-     * 
+     *
      * @depends testConn
      * @depends testBind
      */
@@ -234,7 +261,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::query() with named placeholders
-     * 
+     *
      * @depends testConn
      * @depends testBind_Named
      */
@@ -248,7 +275,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::query() with an update query
-     * 
+     *
      * @depends testConn
      */
     public function testQuery_Write()
@@ -268,7 +295,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test MySQL\Exception by trying to execute and invalid query
-     * 
+     *
      * @depends testQuery
      */
     public function testQuery_Exception()
@@ -289,7 +316,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::fetchAll()
-     * 
+     *
      * @depends testQuery
      */
     public function testFetchAll()
@@ -321,28 +348,28 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::fetchAll() fetching objects
-     * 
+     *
      * @depends fetchAll
      */
     public function testFetchAll_object()
     {
         $class = get_class($this->getMock('stdClass'));
-        
+
         $obj1 = new $class();
         $obj1->id = 1;
         $obj1->name = 'Foo';
-        
+
         $obj2 = new $class();
         $obj2->id = 3;
         $obj2->name = 'Zoo';
-        
+
         $rows = Connection::conn()->fetchAll("SELECT id, name FROM foo WHERE ext = ?", $class, 'tv');
         $this->assertEquals(array($obj1, $obj2), $rows);
     }
-    
+
     /**
      * Test Connection::fetchAll() with a result
-     * 
+     *
      * @depends testQuery
      */
     public function testFetchAll_result()
@@ -354,7 +381,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::fetchOne()
-     * 
+     *
      * @depends testQuery
      */
     public function testFetchOne()
@@ -386,24 +413,24 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::fetchOne() with an object
-     * 
+     *
      * @depends testFetchOne
      */
     public function testFetchOne_object()
     {
         $class = get_class($this->getMock('stdClass'));
-        
+
         $obj = new $class();
         $obj->id = 4;
         $obj->name = 'Man';
-        
+
         $row = Connection::conn()->fetchOne("SELECT id, name FROM foo WHERE id = 4", $class);
         $this->assertEquals($obj, $row);
     }
 
     /**
      * Test Connection::fetchOne() with a result
-     * 
+     *
      * @depends testQuery
      */
     public function testFetchOne_result()
@@ -415,7 +442,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::fetchColumn()
-     * 
+     *
      * @depends testQuery
      */
     public function testFetchColumn()
@@ -444,7 +471,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::fetchColumn() with a result
-     * 
+     *
      * @depends testQuery
      */
     public function testFetchColumn_result()
@@ -456,7 +483,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::FetchPairs()
-     * 
+     *
      * @depends testQuery
      */
     public function testFetchPairs()
@@ -482,7 +509,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::FetchPairs() with a result
-     * 
+     *
      * @depends testQuery
      */
     public function testFetchPairs_result()
@@ -494,7 +521,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::fetchValue()
-     * 
+     *
      * @depends testQuery
      */
     public function testFetchValue()
@@ -517,7 +544,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::fetchValue() with a result
-     * 
+     *
      * @depends testQuery
      */
     public function testFetchValue_result()
@@ -529,7 +556,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::save() with a single new row of data
-     * 
+     *
      * @depends testQuote
      * @depends testBackquote
      * @depends testQuery
@@ -547,7 +574,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::save() with multiple new rows of data
-     * 
+     *
      * @depends testSave
      */
     public function testSave_Rows()
@@ -573,7 +600,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::save() with updates and inserts
-     * 
+     *
      * @depends testSave_Rows
      */
     public function testSave_Update()
@@ -599,7 +626,7 @@ class ConnectionTest extends TestCase
 
     /**
      * Test Connection::save() with ignoring existing records
-     * 
+     *
      * @depends testSave_Rows
      */
     public function testSave_SkipExisting()
@@ -622,32 +649,80 @@ class ConnectionTest extends TestCase
         $this->assertEquals(array('id' => 6, 'name' => 'KLM', 'ext' => 'qq'), $result->fetch_assoc());
         $this->assertEquals(array('id' => 7, 'name' => 'NOP', 'ext' => 'tv'), $result->fetch_assoc());
     }
-    
+
+    /**
+     * Test Connection::tableExists() true and false
+     */
+    public function testTableExists_True()
+    {
+        $this->assertTrue(Connection::conn()->tableExists("foo"));
+    }
+
+    public function testTableExists_False()
+    {
+        $this->assertFalse(Connection::conn()->tableExists("test121"));
+    }
+
+    /**
+     * Test Connection::getAllTables()
+     */
+    public function testGetAllTables()
+    {
+        $this->assertEquals(array(0 => "foo"), Connection::conn()->getAllTables());
+        $this->assertEquals(1, count(Connection::conn()->getAllTables()));
+    }
+
+    /**
+     * Test Connection::load()
+     */
+    public function testLoad()
+    {
+        $instance = Connection::conn()->load("foo",1)->getValues();
+//        $this->assertNull(Connection::conn()->load("notExistentTable",1));
+        $this->assertEquals(array('id' => 1, 'name' => 'Foo', 'ext' => 'tv'),$instance);
+    }
+
+    public function testLoad_NonExistent_Id()
+    {
+        $this->assertNull(Connection::conn()->load("foo",99999));
+    }
+
+    public function testLoad_NonExistent_Table()
+    {
+        try{
+            Connection::conn()->load("notExistentTable",1);
+            $this->fail("No MySQL\Exception was thrown");
+        } catch(\Exception $e){
+            $this->assertInstanceOf('Jasny\DB\MySQL\Exception', $e);
+            $this->assertEquals("Table 'dbtest.not_existent_table' doesn't exist", $e->getError());
+        }
+    }
+
     /**
      * Test Connection::setModelNamespace() and Connection::getModelNamespace()
      */
     public function testSetModelNamespace()
     {
         $this->assertNull($this->db->getModelNamespace());
-        
+
         $this->db->setModelNamespace('Test');
         $this->assertEquals('Test', $this->db->getModelNamespace());
     }
-    
-    
+
+
     /**
      * Test Connection::setLogger() and Connection::logConnection
      */
     public function testLogConnection()
     {
         $message = "MySQL connection {$this->db->host_info}; thread id = {$this->db->thread_id}; version {$this->db->server_info}";
-        
+
         $logger = $this->getMock('Psr\Log\NullLogger', array('debug'));
         $logger->expects($this->once())->method('debug')->with($this->equalTo($message));
-        
+
         $this->db->setLogger($logger);
     }
-    
+
     /**
      * Test Connection::setLogger() and Connection::logQuery
      */
@@ -655,11 +730,11 @@ class ConnectionTest extends TestCase
     {
         $logger = $this->getMock('Psr\Log\NullLogger', array('debug'));
         $this->db->setLogger($logger);
-        
+
         $logger->expects($this->once())->method('debug')->with($this->stringStartsWith("SELECT * FROM foo; # 5 rows in set ("));
         $this->db->fetchAll("SELECT * FROM foo");
     }
-    
+
     /**
      * Test Connection::setLogger() and Connection::logQuery
      */
@@ -667,9 +742,9 @@ class ConnectionTest extends TestCase
     {
         $logger = $this->getMock('Psr\Log\NullLogger', array('debug', 'error'));
         $this->db->setLogger($logger);
-        
+
         $this->setExpectedException('Jasny\DB\MySQL\Exception');
-        
+
         $logger->expects($this->once())->method('debug')->with($this->stringStartsWith("SELECT * FROM foobar; # ("));
         $logger->expects($this->once())->method('error')->with($this->equalTo("Table 'dbtest.foobar' doesn't exist"));
         $this->db->fetchAll("SELECT * FROM foobar");
