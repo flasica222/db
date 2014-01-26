@@ -355,9 +355,4 @@ class TableTest extends TestCase
     {
         $this->markTestIncomplete();
     }
-//
-//    public function testCount()
-//    {
-//        echo(count(100));
-//    }
 }
