@@ -355,4 +355,9 @@ class TableTest extends TestCase
     {
         $this->markTestIncomplete();
     }
+
+    public function testCount()
+    {
+        $this->assertEquals(5, $this->table->count());
+    }
 }
