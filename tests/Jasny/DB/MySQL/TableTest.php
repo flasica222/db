@@ -360,4 +360,5 @@ class TableTest extends TestCase
     {
         $this->assertEquals(5, $this->table->count());
     }
+
 }
