@@ -678,7 +678,6 @@ class ConnectionTest extends TestCase
     public function testLoad()
     {
         $instance = Connection::conn()->load("foo",1)->getValues();
-//        $this->assertNull(Connection::conn()->load("notExistentTable",1));
         $this->assertEquals(array('id' => 1, 'name' => 'Foo', 'ext' => 'tv'),$instance);
     }
 

@@ -2,12 +2,12 @@
 
 /**
  * Tests for Jasny\DB\MySQL\Table.
- * 
+ *
  * The MySQL user needs to have full permissions for `dbtest`.*.
- * 
+ *
  * Please configure default mysqli settings in your php.ini.
  * Alternatively run as `php -d mysqli.default_user=USER -d mysqli.default_pw=PASSWORD /usr/bin/phpunit`
- * 
+ *
  * @author Arnold Daniels
  */
 /** */
@@ -16,7 +16,7 @@ namespace Jasny\DB\MySQL;
 
 /**
  * Base class for test casess for Jasny\DB\MySQL.
- * 
+ *
  * @package Test
  * @subpackage MySQL
  */
@@ -94,7 +94,7 @@ abstract class TestCase extends \PHPUnit_Framework_TestCase
     {
         $this->disconnectDB();
         \Jasny\DB\Table::$defaultConnection = null;
-        
+
         // Clear cached table gateways
         $reflection = new \ReflectionProperty('Jasny\DB\Table', 'tables');
         $reflection->setAccessible(true);

@@ -12,13 +12,14 @@
 /** */
 
 namespace Jasny\DB;
+use Jasny\DB\MySQL\Connection;
 
 /**
  * Tests for Record (without using a DB)
  *
  * @package Test
  */
-class RecordTest extends \PHPUnit_Framework_TestCase
+class RecordTest extends \Jasny\DB\MySQL\TestCase
 {
     /**
      * Test Record::getValues
@@ -46,10 +47,10 @@ class RecordTest extends \PHPUnit_Framework_TestCase
     {
         $record = new \Bar();
         $record->setValues(array('description'=>'CAFE', 'part'=>'hack'));
-        $record->setValues(new \Bar());
+        $record->setValues(new \Foo()); //??????????????????????????
 
         $this->assertNull($record->id);
-        $this->assertEquals('BAR', $record->description);
+        $this->assertEquals( 'CAFE', $record->description);
         $this->assertEquals('u', $record->getPart());
     }
 
@@ -60,9 +61,19 @@ class RecordTest extends \PHPUnit_Framework_TestCase
     {
         $record = new Record();
         $table = $this->getMockBuilder('Jasny\DB\Table')->disableOriginalConstructor()->getMockForAbstractClass();
-
         $record->_setDBTable($table);
         $this->assertSame($table, $record->getDBTable());
+    }
+
+    /**
+     * Test Record::getDBTable name nor set
+     */
+    public function testGetDBTable_dbTableNotSet()
+    {
+        $record = new Record();
+        Connection::conn();
+        $this->assertEquals("record", $record->getDBTable());
+
     }
 
     /**
@@ -78,6 +89,49 @@ class RecordTest extends \PHPUnit_Framework_TestCase
 
         $table->expects($this->once())->method('save')->with($this->equalTo($record));
         $record->save();
+    }
+
+    public function testJSONSerialize()
+    {
+        Connection::conn();
+        $record = new Record();
+        $record->id = 10;
+        $record->no = 12;
+
+        $json = json_encode($record);
+        $this->assertEquals('{"id":10,"no":12}', json_encode($record));
+//        echo(json_decode($json));
+    }
+
+    public function testGetId()
+    {
+        $this->markTestSkipped();
+        $boo = new Record();
+        Connection::conn();
+        $boo->_setDBTable("foo");
+
+        $this->assertEquals("id",$boo->getId());
+
+    }
+
+
+    public function testTable()
+    {
+        $boo = new Record();
+        Connection::conn();
+        $boo->_setDBTable("foo");
+        $table = $boo->getDBTable();
+        $this->assertInstanceOf('Jasny\DB\MySQL\Table', $table->table());
+    }
+
+    public function testNewRecord()
+    {
+        $this->markTestSkipped();
+        $boo = new Record();
+        Connection::conn();
+        $boo->_setDBTable("foo");
+        $table = $boo->getDBTable()->newRecord();
+        $this->assertInstanceOf('Jasny\DB\Record', $table);
     }
 
 }
